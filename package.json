@@ -1,0 +1,11 @@
+{
+  "name": "informe-obra-app",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npx serve public"
+  },
+  "dependencies": {
+    "resend": "^4.1.0"
+  }
+}

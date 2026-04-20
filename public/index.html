@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Informe d'Obra</title>
+
+  <style>
+    :root {
+      --border: #6b7280;
+      --light: #e5e7eb;
+      --ok: #9bd3a6;
+      --bad: #f2a6a6;
+      --bg: #f5f6f7;
+      --text: #2b2b2b;
+      --white: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Barlow', Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      min-height: 100vh;
+    }
+
+    .panel {
+      background: #ffffff;
+      padding: 20px;
+      border-right: 1px solid #ddd;
+      overflow-y: auto;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .panel h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .panel p {
+      margin: 0 0 18px;
+      color: #555;
+      line-height: 1.4;
+    }
+
+    .group {
+      margin-bottom: 18px;
+      padding: 14px;
+      border: 1px solid #ddd;
+      background: #fafafa;
+    }
+
+    .group h2 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    input, textarea, select, button {
+      width: 100%;
+      font: inherit;
+    }
+
+    input, textarea, select {
+      border: 1px solid #ccc;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      background: white;
+    }
+
+    textarea {
+      min-height: 84px;
+      resize: vertical;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .status-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .btn {
+      border: 0;
+      padding: 12px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s ease;
+    }
+
+    .btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .btn-primary { background: #111; color: white; }
+    .btn-secondary { background: #ececec; color: #111; }
+    .btn-tertiary { background: #0b5ed7; color: white; }
+
+    .btn + .btn { margin-top: 10px; }
+
+    .preview-wrap {
+      padding: 24px;
+      overflow: auto;
+    }
+
+    .sheet {
+      width: 210mm;
+      min-height: 297mm;
+      background: white;
+      margin: 0 auto 18px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.08);
+      padding: 12mm;
+      position: relative;
+    }
+
+    .logo {
+      position: absolute;
+      top: 12mm;
+      right: 12mm;
+      width: 120px;
+      height: auto;
+      text-align: right;
+    }
+
+    .logo img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+
+    .logo img.hidden { display: none; }
+
+    table.report {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30mm;
+      table-layout: fixed;
+    }
+
+    table.report td,
+    table.report th {
+      border: 1.5px solid var(--border);
+      padding: 8px 10px;
+      vertical-align: top;
+    }
+
+    table.report th.section,
+    .sectionbar {
+      background: var(--light);
+      text-align: left;
+      font-size: 19px;
+      font-weight: 700;
+    }
+
+    .label-cell {
+      width: 14%;
+      background: var(--light);
+      font-weight: 700;
+    }
+
+    .tight { padding: 6px 8px !important; }
+    .big { font-size: 19px; font-weight: 700; }
+    .multiline { white-space: pre-line; }
+
+    .note-image,
+    .photo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      background: #f7f7f7;
+    }
+
+    .signature-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      background: #f7f7f7;
+    }
+
+    .note-photo-frame {
+      width: 58%;
+      height: 420px;
+      border: 1px solid #ccc;
+      margin: 16px auto 0;
+      overflow: hidden;
+      background: #f7f7f7;
+    }
+
+    .summary-title {
+      font-size: 22px;
+      font-weight: 900;
+      margin: 30mm 0 10px;
+    }
+
+    .summary-grid {
+      border: 1.5px solid var(--border);
+      border-bottom: 0;
+    }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .summary-cell {
+      border-right: 2px solid var(--border);
+      border-bottom: 2px solid var(--border);
+      min-height: 120px;
+    }
+
+    .summary-row .summary-cell:last-child,
+    .status-grid .status-card:last-child,
+    .signature-grid .signature-card:last-child {
+      border-right: 0;
+    }
+
+    .cell-head {
+      background: var(--light);
+      border-bottom: 2px solid var(--border);
+      padding: 8px 10px;
+      font-size: 17px;
+    }
+
+    .cell-body {
+      padding: 10px;
+      height: 420px;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-left: 2px solid var(--border);
+      border-right: 2px solid var(--border);
+    }
+
+    .status-card {
+      border-right: 2px solid var(--border);
+      border-bottom: 2px solid var(--border);
+    }
+
+    .status-top {
+      display: grid;
+      grid-template-columns: 1.3fr .8fr;
+    }
+
+    .status-top div {
+      border-bottom: 2px solid var(--border);
+      padding: 8px 10px;
+      font-size: 16px;
+    }
+
+    .status-value {
+      font-weight: 900;
+      text-align: center;
+      color: #000;
+    }
+
+    .status-ok { background: var(--ok); }
+    .status-bad { background: var(--bad); }
+
+    .small-photo {
+      height: 310px;
+      padding: 10px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .small-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .book-block,
+    .fix-block {
+      border-left: 2px solid var(--border);
+      border-right: 2px solid var(--border);
+      border-bottom: 2px solid var(--border);
+    }
+
+    .book-head,
+    .fix-head {
+      background: var(--light);
+      padding: 8px 10px;
+      border-bottom: 2px solid var(--border);
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .book-text,
+    .legal-text {
+      padding: 8px 10px;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .fix-head { background: var(--ok); }
+
+    .signature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      border-left: 2px solid var(--border);
+      border-right: 2px solid var(--border);
+      border-bottom: 2px solid var(--border);
+      min-height: 220px;
+    }
+
+    .signature-card {
+      border-right: 2px solid var(--border);
+      padding: 8px 10px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .signature-role {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .signature-box {
+      height: 110px;
+      border: 1px solid #ccc;
+      margin: 8px 0;
+      overflow: hidden;
+      background: #fafafa;
+    }
+
+    .signature-name {
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: auto;
+    }
+
+    .hidden { display: none; }
+
+    @media (max-width: 1100px) {
+      .app { grid-template-columns: 1fr; }
+
+      .panel {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .preview-wrap { padding: 14px; }
+
+      .sheet {
+        width: 100%;
+        min-height: auto;
+        padding: 16px;
+      }
+
+      .logo {
+        position: static;
+        margin-left: auto;
+        margin-bottom: 16px;
+      }
+
+      table.report { margin-top: 0; }
+      .summary-title { margin-top: 0; }
+    }
+
+    @media print {
+      body { background: white; }
+      .panel { display: none; }
+      .preview-wrap { padding: 0; }
+
+      .sheet {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0;
+        box-shadow: none;
+        page-break-after: always;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside class="panel">
+      <h1>Informe d'obra</h1>
+      <p>Omple les dades, puja les fotografies i genera un PDF amb l'estructura del model original.</p>
+
+      <div class="group">
+        <h2>Capçalera</h2>
+        <label for="obra">Obra</label>
+        <input id="obra" value="PLANTA DE TRACTAMENT DE RESIDUS MUNICIPALS DEL BAGES. FRACCIÓ RESTA." />
+
+        <div class="row">
+          <div>
+            <label for="fecha">Data</label>
+            <input id="fecha" type="date" value="2026-04-20" />
+          </div>
+          <div>
+            <label for="hora">Hora</label>
+            <input id="hora" type="time" value="10:30" />
+          </div>
+        </div>
+
+        <label for="logoUpload">Logotip</label>
+        <input id="logoUpload" type="file" accept="image/*" />
+      </div>
+
+      <div class="group">
+        <h2>Dades de l'obra</h2>
+        <label for="lot">Lot</label>
+        <input id="lot" value="-" />
+
+        <label for="situacion">Situació</label>
+        <textarea id="situacion">Parc Ambiental de Bufalvent, Ctra. Pont Vilomara Km 2,6 Manresa</textarea>
+
+        <label for="contratista">Contractista / Subcontractista</label>
+        <textarea id="contratista">VIAS Y CONSTRUCCIONES S.A. BENJUMEA (MAQUINÀRIA) CONSTRUCCIONES LA PALMA (Mà d’obra) FERRALLAT HERGA (ferralles) GENERAL DE BOMBEO HORMIGON (Bomba formigonat) PREFABRICATS PUJOL (Prefabricats)</textarea>
+
+        <label for="fases">Fases d'obra</label>
+        <textarea id="fases">Moviment terres, armat murs, aplecs d’encofrats, formigonat, col·locació prefabricats</textarea>
+      </div>
+
+      <div class="group">
+        <h2>Observacions</h2>
+        <label for="observaciones">Observacions / anotacions llibre d'incidències</label>
+        <textarea id="observaciones">A continuació s’aporta anotació al llibre d’incidències.</textarea>
+
+        <label for="fotoNota">Foto anotació / document</label>
+        <input id="fotoNota" type="file" accept="image/*" capture="environment" />
+      </div>
+
+      <div class="group">
+        <h2>Resum d'obra</h2>
+        <label for="actividad1">Activitat 1</label>
+        <input id="actividad1" value="ACTIVITATS D’OBRA" />
+
+        <label for="actividad2">Activitat 2</label>
+        <input id="actividad2" value="Seguiment PSS" />
+
+        <div class="status-row">
+          <div>
+            <label for="estado1">Estat 1</label>
+            <select id="estado1">
+              <option value="INCORRECTE">INCORRECTE</option>
+              <option value="CORRECTE">CORRECTE</option>
+            </select>
+          </div>
+          <div>
+            <label for="estado2">Estat 2</label>
+            <select id="estado2">
+              <option value="CORRECTE">CORRECTE</option>
+              <option value="INCORRECTE">INCORRECTE</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="foto1">Foto activitat 1</label>
+        <input id="foto1" type="file" accept="image/*" capture="environment" />
+
+        <label for="foto2">Foto activitat 2</label>
+        <input id="foto2" type="file" accept="image/*" capture="environment" />
+
+        <label for="auxiliares">Mitjans auxiliars</label>
+        <input id="auxiliares" value="MITJANS AUXILIARS" />
+
+        <label for="protecciones">Proteccions col·lectives</label>
+        <input id="protecciones" value="PROTECCIONS COL·LECTIVES" />
+
+        <div class="status-row">
+          <div>
+            <label for="estado3">Estat 3</label>
+            <select id="estado3">
+              <option value="CORRECTE">CORRECTE</option>
+              <option value="INCORRECTE">INCORRECTE</option>
+            </select>
+          </div>
+          <div>
+            <label for="estado4">Estat 4</label>
+            <select id="estado4">
+              <option value="INCORRECTE">INCORRECTE</option>
+              <option value="CORRECTE">CORRECTE</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="foto3">Foto mitjans auxiliars</label>
+        <input id="foto3" type="file" accept="image/*" capture="environment" />
+
+        <label for="foto4">Foto proteccions col·lectives</label>
+        <input id="foto4" type="file" accept="image/*" capture="environment" />
+      </div>
+
+      <div class="group">
+        <h2>Textos finals</h2>
+        <label for="subcontratacion">Llibre subcontractació</label>
+        <textarea id="subcontratacion">El llibre de subcontractació està habilitat i es troba al dia.</textarea>
+
+        <label for="aEsmenar">A esmenar</label>
+        <textarea id="aEsmenar">Les deficiències observades en matèria de seguretat i salut i les mesures preventives a prendre, s'han comunicat verbalment al representant de l'empresa el mateix dia de la visita, instant a que l'aplicació de les mateixes fos immediata. Tot això, sense perjudici que puguin existir altres riscos o deficiències no contemplats, sent l'empresa, com a millor coneixedora de les seves instal·lacions i processos d'execució, la responsable de detectar-los i corregir-los. El registre s'ha realitzat segons el millor i lleial saber i entendre del tècnic autor d'aquest informe.</textarea>
+      </div>
+
+      <div class="group">
+        <h2>Firmes</h2>
+        <label for="firma1Rol">Rol firma 1</label>
+        <input id="firma1Rol" value="Per QIQ TA SLP - CSSex" />
+
+        <label for="firma1Nombre">Nom i firma 1</label>
+        <input id="firma1Nombre" value="Nom i Firma:" />
+
+        <label for="firma1">Imatge firma 1</label>
+        <input id="firma1" type="file" accept="image/*" />
+
+        <label for="firma2Rol">Rol firma 2</label>
+        <input id="firma2Rol" value="Per Representant de l’empresa" />
+
+        <label for="firma2Nombre">Nom i firma 2</label>
+        <input id="firma2Nombre" value="Nom i Firma:" />
+
+        <label for="firma2">Imatge firma 2</label>
+        <input id="firma2" type="file" accept="image/*" />
+
+        <label for="firma3Rol">Rol firma 3</label>
+        <input id="firma3Rol" value="Per Representat de l’empresa:" />
+
+        <label for="firma3Nombre">Nom i firma 3</label>
+        <input id="firma3Nombre" value="Nom i Firma:" />
+
+        <label for="firma3">Imatge firma 3</label>
+        <input id="firma3" type="file" accept="image/*" />
+      </div>
+
+      <div class="group">
+        <h2>Enviament per correu</h2>
+        <label for="emailDesti">Correu electrònic de destinació</label>
+        <input id="emailDesti" type="email" placeholder="exemple@empresa.cat" />
+
+        <label for="copiaDesti">Còpia (opcional)</label>
+        <input id="copiaDesti" type="email" placeholder="copia@empresa.cat" />
+      </div>
+
+      <button class="btn btn-primary" onclick="window.print()">Generar PDF</button>
+      <button id="btnEnviarCorreu" class="btn btn-tertiary" onclick="enviarCorreu()">Enviar per correu</button>
+      <button class="btn btn-secondary" onclick="resetDemo()">Recarregar exemple</button>
+    </aside>
+
+    <main class="preview-wrap">
+      <section class="sheet">
+        <div class="logo">
+          <img id="previewLogo1" class="hidden" alt="Logotip empresa">
+        </div>
+
+        <table class="report">
+          <tr>
+            <td class="label-cell big">OBRA</td>
+            <td class="big" colspan="3" id="viewObra"></td>
+          </tr>
+          <tr>
+            <td class="label-cell">DATA I HORA</td>
+            <td colspan="3" id="viewFechaHora"></td>
+          </tr>
+          <tr>
+            <th class="section" colspan="4">DADES DE L'OBRA</th>
+          </tr>
+          <tr>
+            <td class="label-cell tight">LOT</td>
+            <td id="viewLot"></td>
+            <td class="label-cell tight">SITUACIÓ</td>
+            <td id="viewSituacion"></td>
+          </tr>
+          <tr>
+            <th class="section" colspan="4">CONTRACTISTA / SUBCONTRACTISTA</th>
+          </tr>
+          <tr>
+            <td colspan="4" class="multiline" id="viewContratista"></td>
+          </tr>
+          <tr>
+            <th class="section" colspan="4">FASES D’OBRA</th>
+          </tr>
+          <tr>
+            <td colspan="4" id="viewFases"></td>
+          </tr>
+          <tr>
+            <th class="section" colspan="4">OBSERVACIONS / ANOTACIONS LLIBRE D’INCIDÈNCIES</th>
+          </tr>
+          <tr>
+            <td colspan="4">
+              <div id="viewObservaciones"></div>
+              <div class="note-photo-frame">
+                <img id="previewNota" class="note-image hidden" alt="Foto anotació" />
+              </div>
+            </td>
+          </tr>
+        </table>
+      </section>
+
+      <section class="sheet">
+        <div class="logo">
+          <img id="previewLogo2" class="hidden" alt="Logotip empresa">
+        </div>
+
+        <div class="summary-title">RESUM D’OBRA</div>
+
+        <div class="summary-grid">
+          <div class="summary-row">
+            <div class="summary-cell">
+              <div class="cell-head" id="viewActividad1"></div>
+              <div class="cell-body photo-box">
+                <img id="preview1" class="hidden" alt="Foto 1">
+              </div>
+            </div>
+            <div class="summary-cell">
+              <div class="cell-head" id="viewActividad2"></div>
+              <div class="cell-body photo-box">
+                <img id="preview2" class="hidden" alt="Foto 2">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-grid">
+          <div class="status-card">
+            <div class="status-top">
+              <div>Estat general</div>
+              <div class="status-value" id="viewEstado1"></div>
+            </div>
+          </div>
+          <div class="status-card">
+            <div class="status-top">
+              <div>Estat general</div>
+              <div class="status-value" id="viewEstado2"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-grid">
+          <div class="status-card">
+            <div class="cell-head" id="viewAuxiliares"></div>
+            <div class="small-photo">
+              <img id="preview3" class="hidden" alt="Foto 3">
+            </div>
+            <div class="status-top">
+              <div>Estat general</div>
+              <div class="status-value" id="viewEstado3"></div>
+            </div>
+          </div>
+
+          <div class="status-card">
+            <div class="cell-head" id="viewProtecciones"></div>
+            <div class="small-photo">
+              <img id="preview4" class="hidden" alt="Foto 4">
+            </div>
+            <div class="status-top">
+              <div>Estat general</div>
+              <div class="status-value" id="viewEstado4"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="book-block">
+          <div class="book-head">LLIBRE SUBCONTRACTACIÓ</div>
+          <div class="book-text" id="viewSubcontratacion"></div>
+        </div>
+
+        <div class="fix-block">
+          <div class="fix-head">A ESMENAR</div>
+          <div class="legal-text" id="viewAEsmenar"></div>
+        </div>
+
+        <div class="signature-grid">
+          <div class="signature-card">
+            <div class="signature-role" id="viewFirma1Rol"></div>
+            <div class="signature-box">
+              <img id="previewFirma1" class="hidden" alt="Firma 1">
+            </div>
+            <div class="signature-name" id="viewFirma1Nombre"></div>
+          </div>
+
+          <div class="signature-card">
+            <div class="signature-role" id="viewFirma2Rol"></div>
+            <div class="signature-box">
+              <img id="previewFirma2" class="hidden" alt="Firma 2">
+            </div>
+            <div class="signature-name" id="viewFirma2Nombre"></div>
+          </div>
+
+          <div class="signature-card">
+            <div class="signature-role" id="viewFirma3Rol"></div>
+            <div class="signature-box">
+              <img id="previewFirma3" class="hidden" alt="Firma 3">
+            </div>
+            <div class="signature-name" id="viewFirma3Nombre"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <script>
+    const API_ENDPOINT = '/api/send-report';
+
+    const fields = [
+      ['obra', 'viewObra'],
+      ['lot', 'viewLot'],
+      ['situacion', 'viewSituacion'],
+      ['contratista', 'viewContratista'],
+      ['fases', 'viewFases'],
+      ['observaciones', 'viewObservaciones'],
+      ['actividad1', 'viewActividad1'],
+      ['actividad2', 'viewActividad2'],
+      ['auxiliares', 'viewAuxiliares'],
+      ['protecciones', 'viewProtecciones'],
+      ['subcontratacion', 'viewSubcontratacion'],
+      ['aEsmenar', 'viewAEsmenar'],
+      ['firma1Rol', 'viewFirma1Rol'],
+      ['firma1Nombre', 'viewFirma1Nombre'],
+      ['firma2Rol', 'viewFirma2Rol'],
+      ['firma2Nombre', 'viewFirma2Nombre'],
+      ['firma3Rol', 'viewFirma3Rol'],
+      ['firma3Nombre', 'viewFirma3Nombre']
+    ];
+
+    function formatFechaHora() {
+      const fecha = document.getElementById('fecha').value;
+      const hora = document.getElementById('hora').value;
+
+      if (!fecha) return hora || '';
+
+      const [y, m, d] = fecha.split('-');
+      return `${d}/${m}/${y.slice(-2)} ${hora ? hora + 'H' : ''}`.trim();
+    }
+
+    function setStatus(id, value) {
+      const el = document.getElementById(id);
+      el.textContent = value;
+      el.classList.remove('status-ok', 'status-bad');
+      el.classList.add(value === 'CORRECTE' ? 'status-ok' : 'status-bad');
+    }
+
+    function bindImage(inputId, imgId) {
+      const input = document.getElementById(inputId);
+      const img = document.getElementById(imgId);
+
+      input.addEventListener('change', () => {
+        const file = input.files && input.files[0];
+
+        if (!file) {
+          img.src = '';
+          img.classList.add('hidden');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = e => {
+          img.src = e.target.result;
+          img.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function bindLogo(inputId, imgIds) {
+      const input = document.getElementById(inputId);
+      const images = imgIds.map(id => document.getElementById(id));
+
+      input.addEventListener('change', () => {
+        const file = input.files && input.files[0];
+
+        if (!file) {
+          images.forEach(img => {
+            img.src = '';
+            img.classList.add('hidden');
+          });
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = e => {
+          images.forEach(img => {
+            img.src = e.target.result;
+            img.classList.remove('hidden');
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function render() {
+      fields.forEach(([from, to]) => {
+        const source = document.getElementById(from);
+        const target = document.getElementById(to);
+        target.textContent = source.value;
+      });
+
+      document.getElementById('viewFechaHora').textContent = formatFechaHora();
+      setStatus('viewEstado1', document.getElementById('estado1').value);
+      setStatus('viewEstado2', document.getElementById('estado2').value);
+      setStatus('viewEstado3', document.getElementById('estado3').value);
+      setStatus('viewEstado4', document.getElementById('estado4').value);
+    }
+
+    function resetDemo() {
+      location.reload();
+    }
+
+    function esEmailValid(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function limpiarNombreArchivo(texto) {
+      return texto
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9-_ ]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .toLowerCase();
+    }
+
+    function esperar(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function generarPdfBase64() {
+      const sheets = document.querySelectorAll('.sheet');
+      const contenidor = document.createElement('div');
+
+      contenidor.style.background = '#ffffff';
+      contenidor.style.padding = '0';
+      contenidor.style.position = 'fixed';
+      contenidor.style.left = '-99999px';
+      contenidor.style.top = '0';
+      contenidor.style.width = '210mm';
+
+      contenidor.appendChild(sheets[0].cloneNode(true));
+      contenidor.appendChild(sheets[1].cloneNode(true));
+      document.body.appendChild(contenidor);
+
+      try {
+        await esperar(350);
+
+        const opt = {
+          margin: 0,
+          filename: `informe-obra-${Date.now()}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff'
+          },
+          jsPDF: {
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait'
+          },
+          pagebreak: { mode: ['css', 'legacy'] }
+        };
+
+        const worker = html2pdf().set(opt).from(contenidor).toPdf();
+        const pdf = await worker.get('pdf');
+        const dataUri = pdf.output('datauristring');
+
+        return dataUri.split(',')[1];
+      } finally {
+        document.body.removeChild(contenidor);
+      }
+    }
+
+    async function enviarCorreu() {
+      const email = document.getElementById('emailDesti').value.trim();
+      const cc = document.getElementById('copiaDesti').value.trim();
+      const obra = document.getElementById('obra').value.trim();
+      const boto = document.getElementById('btnEnviarCorreu');
+      const textOriginal = boto.textContent;
+
+      if (!email) {
+        alert('Introdueix un correu electrònic de destinació.');
+        return;
+      }
+
+      if (!esEmailValid(email)) {
+        alert('El correu electrònic de destinació no és vàlid.');
+        return;
+      }
+
+      if (cc && !esEmailValid(cc)) {
+        alert('El correu electrònic de còpia no és vàlid.');
+        return;
+      }
+
+      try {
+        boto.disabled = true;
+        boto.textContent = 'Generant PDF...';
+
+        const pdfBase64 = await generarPdfBase64();
+        const pdfFilename = `informe-obra-${limpiarNombreArchivo(obra || 'sense-titol')}.pdf`;
+
+        boto.textContent = 'Enviant correu...';
+
+        const response = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            to: email,
+            cc: cc || '',
+            obra,
+            dataHora: formatFechaHora(),
+            pdfBase64,
+            pdfFilename
+          })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result?.error || 'No s’ha pogut enviar el correu.');
+        }
+
+        alert('Correu enviat amb el PDF adjunt.');
+      } catch (error) {
+        console.error(error);
+        alert(`No s'ha pogut enviar el correu.\nDetall: ${error.message || 'Error desconegut'}`);
+      } finally {
+        boto.disabled = false;
+        boto.textContent = textOriginal;
+      }
+    }
+
+    document.querySelectorAll('input, textarea, select').forEach(el => {
+      el.addEventListener('input', render);
+      el.addEventListener('change', render);
+    });
+
+    bindLogo('logoUpload', ['previewLogo1', 'previewLogo2']);
+    bindImage('fotoNota', 'previewNota');
+    bindImage('foto1', 'preview1');
+    bindImage('foto2', 'preview2');
+    bindImage('foto3', 'preview3');
+    bindImage('foto4', 'preview4');
+    bindImage('firma1', 'previewFirma1');
+    bindImage('firma2', 'previewFirma2');
+    bindImage('firma3', 'previewFirma3');
+
+    render();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
